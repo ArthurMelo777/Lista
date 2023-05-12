@@ -1,8 +1,6 @@
 using System;
 
-// Os valores passados por parametro são indices ou nós?
-
-class ListEmptyException : Exception {
+class ListEmpty : Exception {
 
 }
 
@@ -62,30 +60,30 @@ class ListLinkedList {
         return false;
     }
 
-    public Node search (int n) {
+    public Node search (object o) {
         Node new_node = head;
-        for (int i = 0; i <= n; i++) {
+        while (new_node.getElement() != o) {
             new_node = new_node.getNext();
         }
 
         return new_node;
     }
 
-    public bool isFirst (int n) {
+    public bool isFirst (Node n) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
-        if (search(n) == head.getNext()) {
+        if (n == head.getNext()) {
             return true;
         }
         return false;
     }
 
-    public bool isLast (int n) {
+    public bool isLast (Node n) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
-        if (search(n) == tail.getPrev()) {
+        if (n == tail.getPrev()) {
             return true;
         }
         return false;
@@ -93,75 +91,70 @@ class ListLinkedList {
 
     public Node first () {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
         return head.getNext();
     }
 
     public Node last () {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
         return tail.getPrev();
     }
 
-    public Node before (int p) {
+    public Node before (Node p) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
-        return search(p).getPrev();
+        return p.getPrev();
     }
 
-    public Node after (int p) {
+    public Node after (Node p) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
-        return search(p).getNext();
+        return p.getNext();
     }
 
-    public void replaceElement (int n, object o) {
+    public void replaceElement (Node n, object o) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
-        Node new_node = search(n);
-        new_node.setElement(o);
+        n.setElement(o);
     }
 
-    public void swapElements (int n, int q) {
+    public void swapElements (Node n, Node q) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
-        Node new_node = search(n);
-        Node new_node2 = search(q);
-        object o = new_node.getElement();
-        new_node.setElement(new_node2.getElement());
-        new_node2.setElement(o);
+        object o = n.getElement();
+        n.setElement(q.getElement());
+        q.setElement(o);
     }
 
-    public void insertBefore (int n, object o) {
+    public void insertBefore (Node n, object o) {
         Node new_node;
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
         else {
-            Node node = search(n);
-            new_node = new Node(o, node.getPrev(), node);
-            node.getPrev().setNext(new_node);
-            node.setPrev(new_node);
+            new_node = new Node(o, n.getPrev(), n);
+            n.getPrev().setNext(new_node);
+            n.setPrev(new_node);
             countSize++;
         }
     }
 
-    public void insertAfter (int n, object o) {
+    public void insertAfter (Node n, object o) {
         Node new_node;
         if (isEmpty()){
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
         else {
-            Node node = search(n);
-            new_node = new Node(o, node, node.getNext());
-            node.getNext().setPrev(new_node);
-            node.setNext(new_node);
+            new_node = new Node(o, n, n.getNext());
+            n.getNext().setPrev(new_node);
+            n.setNext(new_node);
             countSize++;
         }
     }
@@ -188,21 +181,19 @@ class ListLinkedList {
         countSize++;
     }
 
-    public object remove (int n) {
+    public object remove (Node n) {
         if (isEmpty()) {
-            throw new ListEmptyException();
+            throw new ListEmpty();
         }
 
-        Node new_node = search(n);
-
-        new_node.getPrev().setNext(new_node.getNext());
-        new_node.getNext().setPrev(new_node.getPrev());
-        new_node.setPrev(null);
-        new_node.setNext(null);
+        n.getPrev().setNext(n.getNext());
+        n.getNext().setPrev(n.getPrev());
+        n.setPrev(null);
+        n.setNext(null);
 
         countSize--;
 
-        return new_node.getElement();
+        return n.getElement();
     }
 
     public void printList () {
@@ -222,7 +213,7 @@ class ListLinkedList {
 
 class ListArray {
     private object [] list = new object[1];
-    private int countSize = 0, n = 1;
+    private int countSize = 0, cap = 1;
 
     public void increment () {}
 
@@ -264,26 +255,29 @@ class ListArray {
 class Program {
     public static void Main () {
         ListLinkedList list = new ListLinkedList();
-        list.printList();
-        Console.WriteLine(list.size());
-        Console.WriteLine(list.isEmpty());
-        list.insertFirst(1);
-        list.printList();
-        list.insertLast(2);
-        list.printList();
-        Console.WriteLine(list.before(1).getElement());
-        Console.WriteLine(list.after(0).getElement());
-        Console.WriteLine(list.first().getElement());
-        Console.WriteLine(list.last().getElement());
-        list.replaceElement(0, 0);
-        list.printList();
-        list.swapElements(0, 1);
-        list.printList();
-        list.insertBefore(1, 1);
-        list.printList();
-        list.insertAfter(0, 3); // 2 3 1 0
-        list.printList();
-        Console.WriteLine(list.remove(1));
-        list.printList();
+        Node node, node2;
+        list.printList(); // Lista vazia coleguinha
+        Console.WriteLine(list.size()); // 0
+        Console.WriteLine(list.isEmpty()); // true
+        list.insertFirst(1); //
+        list.printList(); // [ 1 ]
+        list.insertLast(2); //
+        list.printList(); // [ 1 2 ]
+        node = list.first(); // 
+        node2 = list.last(); // 
+        Console.WriteLine(list.before(node2).getElement()); // 1
+        Console.WriteLine(list.after(node).getElement()); // 2
+        Console.WriteLine(list.first().getElement()); // 1
+        Console.WriteLine(list.last().getElement()); // 2
+        list.replaceElement(node, 0); //
+        list.printList(); // [ 0 2 ]
+        list.swapElements(node, node2); //
+        list.printList(); // [ 2 0 ]
+        list.insertBefore(node, 1); //
+        list.printList(); // [ 1 2 0 ]
+        list.insertAfter(node2, 3); //
+        list.printList(); // [ 1 2 0 3 ]
+        Console.WriteLine(list.remove(node)); //
+        list.printList(); // [ 1 0 3 ]
     }
 }
