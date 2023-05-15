@@ -4,6 +4,10 @@ class ListEmpty : Exception {
 
 }
 
+class ElementNotFound : Exception {
+
+}
+
 class Node {
     private object element;
     private Node prev, next;
@@ -215,47 +219,170 @@ class ListArray {
     private object [] list = new object[1];
     private int countSize = 0, cap = 1;
 
-    public void increment () {}
+    public void increment (int n, bool opc) { // bool para decidir se a inserção será antes ou depois, inserção antes == true; depois == false;
+        object [] new_list = new object[++cap];
 
-    public void decrement () {}
+        for (int i = 0; i < countSize; i++) {
+            if (opc && n-1 == i) {
+                i++;
+            }
+            else if (!opc && n+1 == i) {
+                i++;
+            }
+            new_list[i] = list[i];
+        }
 
-    public int size () {}
+        list = new_list;
+    }
 
-    public bool isEmpty () {}
+    public void decrement (int n) {
+        object [] new_list = new object[--cap];
 
-    public bool isFirst (int n) {}
+        int j = 0;
 
-    public bool isLast (int n) {}
+        for (int i = 0; i < countSize; i++) {
+            if (n == i) {
+                j--;
+            }
+            j++;
+            new_list[i] = list[i];
+        }
 
-    public Node first () {}
+        list = new_list;
+    }
 
-    public Node last () {}
+    public int size () {
+        return countSize;
+    }
 
-    public Node before () {}
+    public bool isEmpty () {
+        if (countSize == 0) {
+            return true;
+        }
+        return false;
+    }
 
-    public Node after () {}
+    public bool isFirst (int n) {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        if (n == 0) {
+            return true;
+        }
+        return false;
+    }
 
-    public void replaceElement (int n, object o) {}
+    public bool isLast (int n) {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        if (n == countSize-1) {
+            return true;
+        }
+        return false;
+    }
 
-    public void swapElements (int n, int q) {}
+    public object first () {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        return list[0];
+    }
 
-    public void insertBefore (int n, object o) {}
+    public object last () {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        return list[countSize-1];
+    }
 
-    public void insertAfter (int n, object o) {}
+    public object before (int n) {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        if (n-1 < 0) {
+            throw new ElementNotFound();
+        }
+        return list[n-1];
+    }
 
-    public void insertFirst (object o) {}
+    public object after (int n) {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        if (n+1 >= countSize) {
+            throw new ElementNotFound();
+        }
+        return list[n+1];
+    }
 
-    public void insertLast (object o) {}
+    public void replaceElement (int n, object o) {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        list[n] = o;
+    }
 
-    public void remove (int n) {}
+    public void swapElements (int n, int q) {
+        if (isEmpty()) {
+            throw new ListEmpty();
+        }
+        object aux = list[n];
+        list[n] = list[q];
+        list[q] = aux;
+    }
 
-    public void printList () {}
+    public void insertBefore (int n, object o) {
+        if (n-1 < 0) {
+            throw new ElementNotFound();
+        }
+        countSize++;
+        increment(n, true);
+        list[n-1] = o;
+    }
+
+    public void insertAfter (int n, object o) {
+        if (n >= countSize) {
+            throw new ElementNotFound();
+        }
+        countSize++;
+        increment(n, false);
+        list[n+1] = o;
+    }
+
+    public void insertFirst (object o) {
+        countSize++;
+        increment(0, true);
+        list[0] = o;
+    }
+
+    public void insertLast (object o) {
+        countSize++;
+        increment(countSize-1, false);
+        list[countSize-1] = o;
+    }
+
+    public void remove (int n) {
+        countSize--;
+        decrement(n);
+    }
+
+    public void printList () {
+        if (countSize == 0) {
+            Console.WriteLine("Lista vazia coleguinha!");
+        }
+        else {
+            for (int i = 0; i < countSize; i++) {
+                Console.Write($" [{list[i]}]");
+            }
+            Console.WriteLine();
+        }
+    }
 }
 
 class Program {
     public static void Main () {
-        ListLinkedList list = new ListLinkedList();
-        Node node, node2;
+        ListArray list = new ListArray();
         list.printList(); // Lista vazia coleguinha
         Console.WriteLine(list.size()); // 0
         Console.WriteLine(list.isEmpty()); // true
@@ -263,21 +390,21 @@ class Program {
         list.printList(); // [ 1 ]
         list.insertLast(2); //
         list.printList(); // [ 1 2 ]
-        node = list.first(); // 
-        node2 = list.last(); // 
-        Console.WriteLine(list.before(node2).getElement()); // 1
-        Console.WriteLine(list.after(node).getElement()); // 2
-        Console.WriteLine(list.first().getElement()); // 1
-        Console.WriteLine(list.last().getElement()); // 2
-        list.replaceElement(node, 0); //
+        object o1 = list.first(); // 
+        object o2 = list.last(); // 
+        Console.WriteLine(list.before(1)); // 1
+        Console.WriteLine(list.after(0)); // 2
+        Console.WriteLine(list.first()); // 1
+        Console.WriteLine(list.last()); // 2
+        list.replaceElement(0, 0); //
         list.printList(); // [ 0 2 ]
-        list.swapElements(node, node2); //
+        list.swapElements(0, 1); //
         list.printList(); // [ 2 0 ]
-        list.insertBefore(node, 1); //
+        list.insertBefore(1, 1); //
         list.printList(); // [ 1 2 0 ]
-        list.insertAfter(node2, 3); //
+        list.insertAfter(2, 3); //
         list.printList(); // [ 1 2 0 3 ]
-        Console.WriteLine(list.remove(node)); //
+        list.remove(1); //
         list.printList(); // [ 1 0 3 ]
     }
 }
