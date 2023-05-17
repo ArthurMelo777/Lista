@@ -8,6 +8,22 @@ class ElementNotFound : Exception {
 
 }
 
+class Position {
+    private object element;
+
+    public Position (object e) {
+        element = e;
+    }
+
+    public void setElement (object e) {
+        element = e;
+    }
+
+    public object getElement () {
+        return element;
+    }
+}
+
 class Node {
     private object element;
     private Node prev, next;
@@ -219,7 +235,7 @@ class ListArray {
     private object [] list = new object[1];
     private int countSize = 0, cap = 1;
 
-    public void increment (int n, bool opc) { // bool para decidir se a inserção será antes ou depois, inserção antes == true; depois == false;
+    public void increment (int n, bool opc) { // inserção antes == true; depois == false;
         object [] new_list = new object[++cap];
 
         for (int i = 0; i < countSize; i++) {
@@ -251,6 +267,17 @@ class ListArray {
         list = new_list;
     }
 
+    public int search (Position p) {
+        for (int i = 0; i < countSize; i++) {
+            //Console.WriteLine($"indice = {i}, elemento = {list[i]}, position = {p.getElement()}");
+            if (p.getElement() == list[i]) {
+                //Console.WriteLine($"indice = {i}");
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public int size () {
         return countSize;
     }
@@ -262,21 +289,21 @@ class ListArray {
         return false;
     }
 
-    public bool isFirst (int n) {
+    public bool isFirst (Position p) {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        if (n == 0) {
+        if (search(p) == 0) {
             return true;
         }
         return false;
     }
 
-    public bool isLast (int n) {
+    public bool isLast (Position p) {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        if (n == countSize-1) {
+        if (search(p) == countSize-1) {
             return true;
         }
         return false;
@@ -296,58 +323,72 @@ class ListArray {
         return list[countSize-1];
     }
 
-    public object before (int n) {
+    public object before (Position p) {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        if (n-1 < 0) {
+
+        int i = search(p);
+
+        if (i-1 < 0) {
             throw new ElementNotFound();
         }
-        return list[n-1];
+        return list[i-1];
     }
 
-    public object after (int n) {
+    public object after (Position p) {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        if (n+1 >= countSize) {
+
+        int i = search(p);
+
+        if (i+1 >= countSize) {
             throw new ElementNotFound();
         }
-        return list[n+1];
+        return list[i+1];
     }
 
-    public void replaceElement (int n, object o) {
+    public void replaceElement (Position p, object o) {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        list[n] = o;
+        list[search(p)] = o;
     }
 
-    public void swapElements (int n, int q) {
+    public void swapElements (Position p, Position q) {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        object aux = list[n];
-        list[n] = list[q];
-        list[q] = aux;
+
+        int i1 = search(p), i2 = search(q);
+
+        //Console.WriteLine($"p = {p.getElement()}, i1 = {i1}, i2 = {i2}");
+
+        object aux = list[i1];
+        list[i1] = list[i2];
+        list[i2] = aux;
     }
 
-    public void insertBefore (int n, object o) {
-        if (n-1 < 0) {
+    public void insertBefore (Position p, object o) {
+        int i = search(p);
+        if (i-1 < 0) {
             throw new ElementNotFound();
         }
         countSize++;
-        increment(n, true);
-        list[n-1] = o;
+        increment(i, true);
+        list[i-1] = o;
     }
 
-    public void insertAfter (int n, object o) {
-        if (n >= countSize) {
+    public void insertAfter (Position p, object o) {
+        int i = search(p);
+        
+        if (i >= countSize) {
             throw new ElementNotFound();
         }
         countSize++;
-        increment(n, false);
-        list[n+1] = o;
+        increment(i, false);
+        list[i+1] = o;
     }
 
     public void insertFirst (object o) {
@@ -362,9 +403,9 @@ class ListArray {
         list[countSize-1] = o;
     }
 
-    public void remove (int n) {
+    public void remove (Position p) {
         countSize--;
-        decrement(n);
+        decrement(search(p));
     }
 
     public void printList () {
@@ -390,21 +431,22 @@ class Program {
         list.printList(); // [ 1 ]
         list.insertLast(2); //
         list.printList(); // [ 1 2 ]
-        object o1 = list.first(); // 
-        object o2 = list.last(); // 
-        Console.WriteLine(list.before(1)); // 1
-        Console.WriteLine(list.after(0)); // 2
+        Position p1 = new Position(list.first()); // 
+        Position p2 = new Position(list.last()); // 
+        Console.WriteLine(list.before(p2)); // 1
+        Console.WriteLine(list.after(p1)); // 2
         Console.WriteLine(list.first()); // 1
         Console.WriteLine(list.last()); // 2
-        list.replaceElement(0, 0); //
-        list.printList(); // [ 0 2 ]
-        list.swapElements(0, 1); //
-        list.printList(); // [ 2 0 ]
-        list.insertBefore(1, 1); //
-        list.printList(); // [ 1 2 0 ]
-        list.insertAfter(2, 3); //
-        list.printList(); // [ 1 2 0 3 ]
-        list.remove(1); //
+        //list.replaceElement(p1, 0); //
+        //list.printList();
+        //p1 = new Position(0);
+        //list.swapElements(p1, p2); //
+        //list.printList();
+        list.insertBefore(p2, 1); //
+        list.printList();
+        list.insertAfter(p2, 3); //
+        list.printList();
+        list.remove(p1); //
         list.printList(); // [ 1 0 3 ]
     }
 }
