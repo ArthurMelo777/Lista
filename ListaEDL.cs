@@ -235,32 +235,11 @@ class ListArray {
     private object [] list = new object[1];
     private int countSize = 0, cap = 1;
 
-    public void increment (int n, bool opc) { // inserção antes == true; depois == false;
-        object [] new_list = new object[++cap];
+    public void bend () {
+        cap *= 2;
+        object [] new_list = new object[cap];
 
         for (int i = 0; i < countSize; i++) {
-            if (opc && n-1 == i) {
-                i++;
-            }
-            else if (!opc && n+1 == i) {
-                i++;
-            }
-            new_list[i] = list[i];
-        }
-
-        list = new_list;
-    }
-
-    public void decrement (int n) {
-        object [] new_list = new object[--cap];
-
-        int j = 0;
-
-        for (int i = 0; i < countSize; i++) {
-            if (n == i) {
-                j--;
-            }
-            j++;
             new_list[i] = list[i];
         }
 
@@ -269,9 +248,7 @@ class ListArray {
 
     public int search (Position p) {
         for (int i = 0; i < countSize; i++) {
-            //Console.WriteLine($"indice = {i}, elemento = {list[i]}, position = {p.getElement()}");
             if (p.getElement() == list[i]) {
-                //Console.WriteLine($"indice = {i}");
                 return i;
             }
         }
@@ -353,7 +330,7 @@ class ListArray {
         if (isEmpty()) {
             throw new ListEmpty();
         }
-        list[search(p)] = o;
+        p.setElement(o);
     }
 
     public void swapElements (Position p, Position q) {
@@ -361,51 +338,109 @@ class ListArray {
             throw new ListEmpty();
         }
 
-        int i1 = search(p), i2 = search(q);
-
-        //Console.WriteLine($"p = {p.getElement()}, i1 = {i1}, i2 = {i2}");
-
-        object aux = list[i1];
-        list[i1] = list[i2];
-        list[i2] = aux;
+        object aux = p.getElement();
+        p.setElement(q);
+        q.setElement(aux);
     }
 
     public void insertBefore (Position p, object o) {
-        int i = search(p);
-        if (i-1 < 0) {
-            throw new ElementNotFound();
+        int r = search(p);
+        if (countSize >= cap) {
+            bend();
         }
+
+        object [] new_list = new object[cap];
+        
+        for (int i = 0; i < countSize; i++) {
+            if (i == r+1) {
+                new_list[i] = o;
+                i++;
+            }
+            new_list[i] = list[i];
+        }
+
+        list = new_list;
+
         countSize++;
-        increment(i, true);
-        list[i-1] = o;
     }
 
     public void insertAfter (Position p, object o) {
-        int i = search(p);
-        
-        if (i >= countSize) {
-            throw new ElementNotFound();
+        int r = search(p);
+        if (countSize >= cap) {
+            bend();
         }
+
+        object [] new_list = new object[cap];
+        
+        for (int i = 0; i < countSize; i++) {
+            if (i == r-1) {
+                new_list[i] = o;
+                i++;
+            }
+            new_list[i] = list[i];
+        }
+
+        list = new_list;
+
         countSize++;
-        increment(i, false);
-        list[i+1] = o;
     }
 
-    public void insertFirst (object o) {
+    public void insertFirst (Position o) {
+        if (countSize >= cap) {
+            bend();
+        }
+
+        object [] new_list = new object[cap];
+        
+        new_list[0] = o.getElement();
+
+        for (int i = 1; i < countSize; i++) {
+            new_list[i] = list[i-1];
+        }
+
+        list = new_list;
+
         countSize++;
-        increment(0, true);
-        list[0] = o;
     }
 
-    public void insertLast (object o) {
+    public void insertLast (Position o) {
+        if (countSize >= cap) {
+            bend();
+        }
+
+        object [] new_list = new object[cap];
+        
+        new_list[countSize] = o.getElement();
+
+        for (int i = 0; i < countSize; i++) {
+            new_list[i] = list[i];
+        }
+
+        list = new_list;
+
         countSize++;
-        increment(countSize-1, false);
-        list[countSize-1] = o;
     }
 
     public void remove (Position p) {
+        if (countSize >= cap) {
+            bend();
+        }
+
+        object [] new_list = new object[cap];
+        
+        new_list[countSize] = p.getElement();
+
+        int r = search(p);
+
+        for (int i = r; i < countSize; i++) {
+            new_list[i] = list[i+1];
+        }
+
+        new_list[countSize-1] = null;
+
+        list = new_list;
+
         countSize--;
-        decrement(search(p));
     }
 
     public void printList () {
@@ -427,12 +462,14 @@ class Program {
         list.printList(); // Lista vazia coleguinha
         Console.WriteLine(list.size()); // 0
         Console.WriteLine(list.isEmpty()); // true
-        list.insertFirst(1); //
+        Position p1 = new Position(1); // 
+        Position p2 = new Position(2); // 
+        list.insertFirst(p1); //
         list.printList(); // [ 1 ]
-        list.insertLast(2); //
+        list.insertLast(p2); //
         list.printList(); // [ 1 2 ]
-        Position p1 = new Position(list.first()); // 
-        Position p2 = new Position(list.last()); // 
+        Console.WriteLine(list.first()); // 
+        Console.WriteLine(list.last()); // 
         Console.WriteLine(list.before(p2)); // 1
         Console.WriteLine(list.after(p1)); // 2
         Console.WriteLine(list.first()); // 1
